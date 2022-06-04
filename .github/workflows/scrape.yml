@@ -26,7 +26,7 @@ jobs:
           python-version: "3.8"
           cache: pip
       - run: pip install -r src/requirements.txt
-      - run: curl -fsSLO https://github.com/mycard/ygopro-database/blob/${{ github.event.inputs.revision }}/locales/zh-CN/cards.cdb
+      - run: curl -fsSLO https://github.com/mycard/ygopro-database/raw/${{ github.event.inputs.revision }}/locales/zh-CN/cards.cdb
       - run: python3 src/job.py cards.cdb 100 ${{ matrix.partition }} zh-CN
       - name: Commit
         if: ${{ always() }}
