@@ -1,3 +1,4 @@
+import os
 import random
 import sqlite3
 import sys
@@ -22,7 +23,7 @@ def wait(client: Client) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        sys.exit(f"Usage: {sys.argv[0]} <cards.cdb> <partition size> <partition index>")
+        sys.exit(f"Usage: {sys.argv[0]} <cards.cdb> <partition size> <partition index> [output directory]")
 
     file = sys.argv[1]
     size = int(sys.argv[2])
@@ -37,6 +38,9 @@ if __name__ == "__main__":
         cards = cursor.fetchall()
         cursor.close()
         del cursor
+
+    if sys.argv[4]:
+        os.chdir(sys.argv[4])
 
     with Client(http2=True) as client:
         yaml = YAML()
