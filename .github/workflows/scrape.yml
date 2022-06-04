@@ -16,8 +16,8 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        # 5 partitions of 200 for the first 1000 cards
-        partition: [0, 2, 3, 4]
+        # 11 partitions of 1000 from the 1000th card to the end
+        partition: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -27,13 +27,13 @@ jobs:
           cache: pip
       - run: pip install -r src/requirements.txt
       - run: curl -fsSLO https://github.com/mycard/ygopro-database/raw/${{ github.event.inputs.revision }}/locales/zh-CN/cards.cdb
-      - run: python3 src/job.py cards.cdb 200 ${{ matrix.partition }} zh-CN
+      - run: python3 src/job.py cards.cdb 1000 ${{ matrix.partition }} zh-CN
       - name: Commit
         if: ${{ always() }}
         run: |
           git config user.name GitHub Actions
           git config user.email noreply@github.com
           git add .
-          git commit -m "Scrape partition ${{ matrix.partition }}, size 200, ${{ github.event.inputs.revision }}"
+          git commit -m "Scrape partition ${{ matrix.partition }}, size 1000, ${{ github.event.inputs.revision }}"
           git pull --rebase
           git push
