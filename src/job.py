@@ -3,22 +3,42 @@ import random
 import sqlite3
 import sys
 import time
+from typing import Any, Dict, Optional
 
-from httpx import Client, HTTPStatusError
+from httpx import Client, HTTPStatusError, RequestError
 from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import LiteralScalarString
 
 from scraper import get_card
 
 
-def wait(client: Client) -> None:
+def wait(client: Client, retry: int = 0) -> None:
     """
     Uses a custom attribute set by get_card to sleep for longer if needed.
     """
     if client.rate_limit and client.rate_limit < 10:
         time.sleep(random.uniform(20, 30))
     else:
-        time.sleep(random.uniform(2, 4))
+        time.sleep(random.uniform(2 + retry, 4 + retry))
+
+
+def get_card_retry(*args, **kwargs) -> Optional[Dict[str, Any]]:
+    for retry in range(5):
+        try:
+            card = get_card(*args, **kwargs)
+            if card:
+                return card._asdict()
+            else:
+                print(f"{password}\t{client.rate_limit}\tNOT FOUND", flush=True)
+                wait(client)
+                return
+        except HTTPStatusError as e:
+            print(f"{password}\t{client.rate_limit}\tFAIL {e.response.status_code}", flush=True)
+            wait(client)
+            return
+        except RequestError as e:
+            print(f"{password}\tTRY {retry}\t{e}", flush=True)
+            wait(client, retry)
 
 
 if __name__ == "__main__":
@@ -49,17 +69,8 @@ if __name__ == "__main__":
                 print(f"{password}\tSKIP", flush=True)
                 continue
 
-            try:
-                card = get_card(client, password)
-                if card:
-                    card = card._asdict()
-                else:
-                    print(f"{password}\t{client.rate_limit}\tNOT FOUND", flush=True)
-                    wait(client)
-                    continue
-            except HTTPStatusError as e:
-                print(f"{password}\t{client.rate_limit}\tFAIL {e.response.status_code}", flush=True)
-                wait(client)
+            card = get_card_retry(client, password)
+            if card is None:
                 continue
 
             card["text"] = LiteralScalarString(card["text"])
