@@ -16,7 +16,7 @@ def wait(client: Client) -> None:
     Uses a custom attribute set by get_card to sleep for longer if needed.
     """
     if client.rate_limit and client.rate_limit < 10:
-        time.sleep(random.uniform(10, 20))
+        time.sleep(random.uniform(20, 30))
     else:
         time.sleep(random.uniform(2, 4))
 
@@ -46,7 +46,13 @@ if __name__ == "__main__":
         yaml = YAML()
         for (password,) in cards:
             try:
-                card = get_card(client, password)._asdict()
+                card = get_card(client, password)
+                if card:
+                    card = card._asdict()
+                else:
+                    print(f"{password}\t{client.rate_limit}\tNOT FOUND", flush=True)
+                    wait(client)
+                    continue
             except HTTPStatusError as e:
                 print(f"{password}\t{client.rate_limit}\tFAIL {e.response.status_code}", flush=True)
                 wait(client)

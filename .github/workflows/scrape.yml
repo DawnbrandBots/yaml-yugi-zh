@@ -1,0 +1,38 @@
+name: Scrape OurOCG for card text
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: MyCard GitHub commit SHA
+        required: true
+
+jobs:
+  scrape:
+    # https://docs.github.com/en/actions/learn-github-actions/usage-limits-billing-and-administration
+    # Since each job can run for a maximum of six hours, and we wait after each request to minimize server load,
+    # we partition the almost-12000 official cards into multiple jobs with this matrix and run them sequentially.
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        # 10 partitions of 100 for the first 1000 cards
+        partition: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+          cache: pip
+      - run: pip install -r src/requirements.txt
+      - run: curl -fsSLO https://github.com/mycard/ygopro-database/blob/${{ github.event.inputs.revision }}/locales/zh-CN/cards.cdb
+      - run: python3 src/job.py cards.cdb 100 ${{ matrix.partition }} zh-CN
+      - name: Commit
+        if: ${{ always() }}
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Scrape partition ${{ matrix.partition }}, size 100, ${{ github.event.inputs.revision }}"
+          git push
