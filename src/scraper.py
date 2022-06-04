@@ -35,11 +35,19 @@ def strip_text(raw: str) -> str:
 
 
 def get_card(client: httpx.Client, password: int) -> Optional[CardText]:
+    """
+    Parses card text from the website. HTTP errors are raised. Rate limits are recorded in client.rate_limit
+
+    :param client: HTTPX Client. May support HTTP2 but shouldn't have defaults that majorly change behaviour.
+    :param password: Card password to fetch.
+    :return: None if card not found, otherwise a NamedTuple of the result.
+    """
     url = f"https://www.ourocg.cn/search/{password}"
     response = client.get(url, follow_redirects=True)
-    # print(response.request.headers)
-    # print(response.headers)
-    # print(response.headers.get("x-ratelimit-remaining"))
+    try:
+        client.rate_limit = int(response.headers.get("x-ratelimit-remaining"))
+    except:
+        client.rate_limit = None
     response.raise_for_status()
     if response.url == url:  # Must be redirected for the search to have a match
         return None
