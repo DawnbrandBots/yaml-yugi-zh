@@ -44,7 +44,7 @@ def get_card(client: httpx.Client, password: int) -> Optional[CardText]:
     if response.url == url:  # Must be redirected for the search to have a match
         return None
 
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, "html.parser")
     name = soup.h1.div.text.strip()  # Could use .string
 
     text_span = soup.find("div", attrs={"class": "effect"}).span
