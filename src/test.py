@@ -27,5 +27,5 @@ if __name__ == "__main__":
         passwords = sys.argv[1:]
         with Client(http2=True) as client:
             for password in passwords:
-                get_card(client, password)
+                print(get_card(client, password))
                 time.sleep(random.uniform(2, 4))

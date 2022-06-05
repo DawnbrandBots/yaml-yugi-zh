@@ -57,7 +57,13 @@ def get_card(client: httpx.Client, password: int) -> Optional[CardText]:
 
     text_span = soup.find("div", attrs={"class": "effect"}).span
     if text_span.div:  # class="line" separating Pendulum and main text
-        pendulum, *text = text_span.stripped_strings
+        stripped_strings = tuple(text_span.stripped_strings)
+        if "灵摆效果：" in stripped_strings[0]:  # default case, Pendulum text comes first
+            pendulum, *text = stripped_strings
+        elif "灵摆效果：" in stripped_strings[-1]:  # uncommon ill-formatted case, Pendulum text comes second
+            *text, pendulum = stripped_strings
+        else:  # indeterminate case, so far only known to occur with 47075569 Performapal Pendulum Sorcerer
+            return None
         pendulum = pendulum.split("灵摆效果：")[1]  # Remove prefixed label
         # 无
         text = "\n".join(text)  # Sometimes a <br /> separates the main card text when there's a Material line

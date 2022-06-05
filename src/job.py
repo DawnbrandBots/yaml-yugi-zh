@@ -63,6 +63,7 @@ if __name__ == "__main__":
         os.chdir(sys.argv[4])
 
     with Client(http2=True) as client:
+        client.rate_limit = None
         yaml = YAML()
         for (password,) in cards:
             if os.path.exists(f"{password}.yaml"):
