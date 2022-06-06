@@ -52,8 +52,8 @@ if __name__ == "__main__":
         cursor = connection.cursor()
         cursor: sqlite3.Cursor
         cursor.execute(
-            #"SELECT id FROM datas WHERE alias = 0 AND (type & 0x4000 = 0) LIMIT ? OFFSET ?",
-            "SELECT id FROM datas WHERE alias = 0 AND type & 0x1000000 ORDER BY id DESC LIMIT ? OFFSET ?",
+            "SELECT id FROM datas WHERE alias = 0 AND (type & 0x4000 = 0) LIMIT ? OFFSET ?",
+            # "SELECT id FROM datas WHERE alias = 0 AND type & 0x1000000 ORDER BY id DESC LIMIT ? OFFSET ?",
             (size, index * size)
         )
         cards = cursor.fetchall()
@@ -67,9 +67,9 @@ if __name__ == "__main__":
         client.rate_limit = None
         yaml = YAML()
         for (password,) in cards:
-            #if os.path.exists(f"{password}.yaml"):
-            #    print(f"{password}\tSKIP", flush=True)
-            #    continue
+            if os.path.exists(f"{password}.yaml"):
+                # print(f"{password}\tSKIP", flush=True)
+                continue
 
             card = get_card_retry(client, password)
             if card is None:
