@@ -1,15 +1,10 @@
 name: 机壳汇编器 不安定
 text: |-
-  通常·灵摆：qliphoth.exe 中的 0x1i-666 确认到未处理的异常。
+  qliphoth.exe 中的 0x1i-666 确认到未处理的异常。
   写入位置 0x00-000 时发生访问冲突。
   您想忽略此错误并尝试继续吗? <Y/N>...[ ]
   ===CARNAGE===
   恶gn善iod道ru知能oy似no相yr们gn我a与s经i已do人G那
   着doo活lfe远永rif就g吃n子i果r的b树o命t生t摘又n手a伸w他怕d恐n在a现
 pendulum: |-
-  通常·灵摆：qliphoth.exe 中的 0x1i-666 确认到未处理的异常。
-  写入位置 0x00-000 时发生访问冲突。
-  您想忽略此错误并尝试继续吗? <Y/N>...[ ]
-  ===CARNAGE===
-  恶gn善iod道ru知能oy似no相yr们gn我a与s经i已do人G那
-  着doo活lfe远永rif就g吃n子i果r的b树o命t生t摘又n手a伸w他怕d恐n在a现
+  ①：自己不是「机壳」怪兽不能特殊召唤。这个效果不会被无效化。②：自己上级召唤成功的回合的结束阶段才能发动。自己从卡组抽出这个回合自己为上级召唤而解放的「机壳」怪兽的数量。
