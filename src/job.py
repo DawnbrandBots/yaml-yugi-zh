@@ -52,7 +52,8 @@ if __name__ == "__main__":
         cursor = connection.cursor()
         cursor: sqlite3.Cursor
         cursor.execute(
-            "SELECT id FROM datas WHERE alias = 0 AND (type & 0x4000 = 0) LIMIT ? OFFSET ?",
+            #"SELECT id FROM datas WHERE alias = 0 AND (type & 0x4000 = 0) LIMIT ? OFFSET ?",
+            "SELECT id FROM datas WHERE alias = 0 AND type & 0x1000000 ORDER BY id DESC LIMIT ? OFFSET ?",
             (size, index * size)
         )
         cards = cursor.fetchall()
@@ -76,7 +77,7 @@ if __name__ == "__main__":
 
             card["text"] = LiteralScalarString(card["text"])
             if card["pendulum"]:
-                card["pendulum"] = LiteralScalarString(card["text"])
+                card["pendulum"] = LiteralScalarString(card["pendulum"])
             with open(f"{password}.yaml", mode="w", encoding="utf-8") as out:
                 yaml.dump(card, out)
             print(f"{password}\t{client.rate_limit}", flush=True)
