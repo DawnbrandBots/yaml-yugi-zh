@@ -67,9 +67,9 @@ if __name__ == "__main__":
         client.rate_limit = None
         yaml = YAML()
         for (password,) in cards:
-            if os.path.exists(f"{password}.yaml"):
-                print(f"{password}\tSKIP", flush=True)
-                continue
+            #if os.path.exists(f"{password}.yaml"):
+            #    print(f"{password}\tSKIP", flush=True)
+            #    continue
 
             card = get_card_retry(client, password)
             if card is None:
