@@ -17,6 +17,7 @@ def strip_text(raw: str) -> str:
     prefixes = [
         "描述：",  # Flavour text
         "效果：",  # Effect, usually on Pendulums
+        "灵摆：",  # Pendulum
         "特殊召唤：",  # Special Summon (e.g. Eater of Millions)
         "调整：",  # Tuner
         "卡通：",  # Toon
