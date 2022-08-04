@@ -66,7 +66,8 @@ def get_card(client: httpx.Client, password: int) -> Optional[CardText]:
         else:  # indeterminate case, so far only known to occur with 47075569 Performapal Pendulum Sorcerer
             return None
         pendulum = pendulum.split("灵摆效果：")[1]  # Remove prefixed label
-        # 无
+        if pendulum == "无":
+            pendulum = None
         text = "\n".join(text)  # Sometimes a <br /> separates the main card text when there's a Material line
     else:
         pendulum = None
