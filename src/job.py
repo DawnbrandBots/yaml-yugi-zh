@@ -43,6 +43,16 @@ def get_card_retry(*args, **kwargs) -> Optional[Dict[str, Any]]:
             wait(client, retry)
 
 
+OVERRIDES = {
+    10000000: "0zsP0",  # Obelisk
+    10000010: "nJsMA",  # Ra
+    10000020: "o0sgV",  # Osiris
+    10000030: "lNs5nA",  # Magi Magi
+    10000040: "lNs5o7",  # Holactie
+    10000080: "rks4pk",  # Sphere
+    10000090: "PPsX1b",  # Phoenix
+}
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         sys.exit(f"Usage: {sys.argv[0]} <cards.cdb> <partition size> <partition index> [output directory]")
@@ -62,7 +72,7 @@ if __name__ == "__main__":
         cursor.close()
         del cursor
 
-    if sys.argv[4]:
+    if len(sys.argv) > 4:
         os.chdir(sys.argv[4])
 
     with Client(http2=True) as client:
@@ -73,7 +83,10 @@ if __name__ == "__main__":
                 # print(f"{password}\tSKIP", flush=True)
                 continue
 
-            card = get_card_retry(client, password=password)
+            if password not in OVERRIDES:
+                card = get_card_retry(client, password=password)
+            else:
+                card = get_card_retry(client, slug=OVERRIDES[password])
             if card is None:
                 continue
 
