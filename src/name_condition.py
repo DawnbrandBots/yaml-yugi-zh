@@ -38,7 +38,7 @@ if __name__ == "__main__":
                 print(f"{password}\tSKIP", flush=True)
                 continue
 
-            card = get_card_retry(client, password)
+            card = get_card_retry(client, password=password)
             if card is None:
                 continue
 

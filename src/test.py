@@ -23,9 +23,9 @@ from scraper import get_card
 # ]
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        passwords = sys.argv[1:]
+    if len(sys.argv) > 2:
+        _, key, *args = sys.argv  # key = password OR slug
         with Client(http2=True) as client:
-            for password in passwords:
-                print(get_card(client, password))
+            for arg in args:
+                print(get_card(client, **{key: arg}))
                 time.sleep(random.uniform(2, 4))

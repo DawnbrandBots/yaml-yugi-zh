@@ -37,22 +37,28 @@ def strip_text(raw: str) -> str:
     return raw
 
 
-def get_card(client: httpx.Client, password: int) -> Optional[CardText]:
+def get_card(client: httpx.Client, *, password: Optional[int] = None, slug: Optional[str] = None) -> Optional[CardText]:
     """
     Parses card text from the website. HTTP errors are raised. Rate limits are recorded in client.rate_limit
 
     :param client: HTTPX Client. May support HTTP2 but shouldn't have defaults that majorly change behaviour.
     :param password: Card password to fetch.
+    :param slug: Direct slug of the page to fetch, alternatively.
     :return: None if card not found, otherwise a NamedTuple of the result.
     """
-    url = f"https://www.ourocg.cn/search/{password}"
+    if password is not None:
+        url = f"https://www.ourocg.cn/search/{password}"
+    elif slug is not None:
+        url = f"https://www.ourocg.cn/card/{slug}"
+    else:
+        raise ValueError("Must provide one of password or slug")
     response = client.get(url, follow_redirects=True)
     try:
         client.rate_limit = int(response.headers.get("x-ratelimit-remaining"))
     except:
         client.rate_limit = None
     response.raise_for_status()
-    if response.url == url:  # Must be redirected for the search to have a match
+    if password is not None and response.url == url:  # Must be redirected for the search to have a match
         return None
 
     soup = BeautifulSoup(response.text, "html.parser")
