@@ -26,7 +26,7 @@ def strip_text(raw: str) -> str:
         "灵魂：",  # Spirit
         "同盟：",  # Union
         "二重：",  # Gemini
-        "反转：",  # Flip
+        "效果·反转：",  # Flip, but not "FLIP:"
         "融合：",  # Fusion
         "同调：",  # Synchro
         "XYZ：",

@@ -93,6 +93,8 @@ if __name__ == "__main__":
             card["text"] = LiteralScalarString(card["text"])
             if card["pendulum"]:
                 card["pendulum"] = LiteralScalarString(card["pendulum"])
+            else:
+                card.pop("pendulum")
             with open(f"{password}.yaml", mode="w", encoding="utf-8") as out:
                 yaml.dump(card, out)
             print(f"{password}\t{client.rate_limit}", flush=True)
