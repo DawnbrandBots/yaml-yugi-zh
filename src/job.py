@@ -76,6 +76,7 @@ if __name__ == "__main__":
                 (args.size, args.index * args.size)
             )
             cards = cursor.fetchall()
+            cards = [password for (password,) in cards]
             cursor.close()
             del cursor
     else:
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     with Client(http2=True) as client:
         client.rate_limit = None
         yaml = YAML()
-        for (password,) in cards:
+        for password in cards:
             if args.skip and os.path.exists(f"{password}.yaml"):
                 # print(f"{password}\tSKIP", flush=True)
                 continue
