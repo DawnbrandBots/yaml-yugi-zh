@@ -7,7 +7,6 @@ on:
     inputs:
       revision:
         description: MyCard GitHub commit SHA
-        required: true
 
 jobs:
   scrape:
@@ -27,8 +26,14 @@ jobs:
           python-version: "3.8"
           cache: pip
       - run: pip install -r src/requirements.txt
-      - run: curl -fsSLO https://github.com/mycard/ygopro-database/raw/${{ github.event.inputs.revision }}/locales/zh-CN/cards.cdb
-      - run: python3 src/job.py cards.cdb 12000 ${{ matrix.partition }} zh-CN
+      - if: ${{ github.event.inputs.revision }}
+        run: curl -fsSLO https://github.com/mycard/ygopro-database/raw/${{ github.event.inputs.revision }}/locales/zh-CN/cards.cdb
+      - if: ${{ !github.event.inputs.revision }}
+        run: curl -fsSLO https://github.com/DawnbrandBots/yaml-yugi/raw/aggregate/cards.json
+      - if: ${{ github.event.inputs.revision }}
+        run: python3 src/job.py --cdb cards.cdb --size 12000 --index ${{ matrix.partition }} --output zh-CN --skip
+      - if: ${{ !github.event.inputs.revision }}
+        run: python3 src/job.py --json cards.json --size 12000 --index ${{ matrix.partition }} --output zh-CN --skip
       - name: Commit
         if: ${{ always() }}
         run: |

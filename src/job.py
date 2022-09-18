@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: © 2022 Kevin Lu
 # SPDX-Licence-Identifier: LGPL-3.0-or-later
+from argparse import ArgumentParser
+import json
 import os
 import random
 import sqlite3
-import sys
 import time
 from typing import Any, Dict, Optional
 
@@ -12,6 +13,16 @@ from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import LiteralScalarString
 
 from scraper import get_card
+
+
+parser = ArgumentParser()
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument("--cdb", help="CDB containing passwords to scrape")
+group.add_argument("--json", help="YAML Yugi aggregate JSON containing passwords to scrape")
+parser.add_argument("--size", type=int, required=True, help="Partition size per worker process")
+parser.add_argument("--index", type=int, required=True, help="Partition index for this worker process")
+parser.add_argument("--output", help="Optional output directory")
+parser.add_argument("--skip", action="store_true", help="Skip already-existing files")
 
 
 def wait(client: Client, retry: int = 0) -> None:
@@ -54,32 +65,35 @@ OVERRIDES = {
 }
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        sys.exit(f"Usage: {sys.argv[0]} <cards.cdb> <partition size> <partition index> [output directory]")
+    args = parser.parse_args()
+    if args.cdb:
+        with sqlite3.connect(args.cdb) as connection:
+            cursor = connection.cursor()
+            cursor: sqlite3.Cursor
+            cursor.execute(
+                "SELECT id FROM datas WHERE alias = 0 AND (type & 0x4000 = 0) LIMIT ? OFFSET ?",
+                # "SELECT id FROM datas WHERE alias = 0 AND type & 0x1000000 ORDER BY id DESC LIMIT ? OFFSET ?",
+                (args.size, args.index * args.size)
+            )
+            cards = cursor.fetchall()
+            cursor.close()
+            del cursor
+    else:
+        with open(args.json) as handle:
+            data = json.load(handle)
+        print(f"Found {len(data)} cards.", flush=True)
+        cards = [card["password"] for card in data if card.get("password")]
+        print(f"Considering {len(cards)} cards with passwords.", flush=True)
+        cards = cards[args.index * args.size:(args.index + 1) * args.size]
 
-    file = sys.argv[1]
-    size = int(sys.argv[2])
-    index = int(sys.argv[3])
-    with sqlite3.connect(file) as connection:
-        cursor = connection.cursor()
-        cursor: sqlite3.Cursor
-        cursor.execute(
-            "SELECT id FROM datas WHERE alias = 0 AND (type & 0x4000 = 0) LIMIT ? OFFSET ?",
-            # "SELECT id FROM datas WHERE alias = 0 AND type & 0x1000000 ORDER BY id DESC LIMIT ? OFFSET ?",
-            (size, index * size)
-        )
-        cards = cursor.fetchall()
-        cursor.close()
-        del cursor
-
-    if len(sys.argv) > 4:
-        os.chdir(sys.argv[4])
+    if args.output:
+        os.chdir(args.output)
 
     with Client(http2=True) as client:
         client.rate_limit = None
         yaml = YAML()
         for (password,) in cards:
-            if os.path.exists(f"{password}.yaml"):
+            if args.skip and os.path.exists(f"{password}.yaml"):
                 # print(f"{password}\tSKIP", flush=True)
                 continue
 
