@@ -7,6 +7,7 @@ on:
     inputs:
       revision:
         description: MyCard GitHub commit SHA
+        required: false
 
 jobs:
   scrape:
@@ -17,7 +18,8 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        partition: [0]
+        # 12 partitions of 1000
+        partition: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -31,15 +33,15 @@ jobs:
       - if: ${{ !github.event.inputs.revision }}
         run: curl -fsSLO https://github.com/DawnbrandBots/yaml-yugi/raw/aggregate/cards.json
       - if: ${{ github.event.inputs.revision }}
-        run: python3 src/job.py --cdb cards.cdb --size 12000 --index ${{ matrix.partition }} --output zh-CN --skip
+        run: python3 src/job.py --cdb cards.cdb --size 1000 --index ${{ matrix.partition }} --output zh-CN
       - if: ${{ !github.event.inputs.revision }}
-        run: python3 src/job.py --json cards.json --size 12000 --index ${{ matrix.partition }} --output zh-CN --skip
+        run: python3 src/job.py --json cards.json --size 1000 --index ${{ matrix.partition }} --output zh-CN
       - name: Commit
         if: ${{ always() }}
         run: |
           git config user.name GitHub Actions
           git config user.email noreply@github.com
           git add .
-          git commit -m "Scrape partition ${{ matrix.partition }}, size 12000 (validation), ${{ github.event.inputs.revision }}"
+          git commit -m "Scrape partition ${{ matrix.partition }}, size 1000 (validation), ${{ github.event.inputs.revision }}"
           git pull --rebase
           git push
